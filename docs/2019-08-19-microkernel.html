@@ -1,7 +1,9 @@
 <!DOCTYPE html>
+
 <html>
 <head>
-<meta charset="utf-8">
+    <link rel="stylesheet" href="style.css">
+<meta charset="utf-8"/>
 <title>关于微内核的对话</title>
 </head>
 <body>
@@ -12,71 +14,47 @@
                document.body.classList.add('mobile');
             }
         ]]></script>
-<div class="inner">&#13;
-            <h2>关于微内核的对话</h2>&#13;
-            <p>不知怎么的，最近“微内核 vs 宏内核”又成了热门话题。这场争论从 1992 年开始……</p>
-
+<div class="inner">
+<h2>关于微内核的对话</h2>
+<p>不知怎么的，最近“微内核 vs 宏内核”又成了热门话题。这场争论从 1992 年开始……</p>
 <p><img src="https://www.yinwang.org/images/minix-flamewar.jpg" width="56%"/></p>
-
 <h3 id="前言">前言</h3>
-
 <p>说实话我很久没有关心操作系统了，因为通常所谓的“操作系统”在我心里不过是一个 C 语言的运行时系统（run-time system），就像 JVM 是 Java 的运行时系统一样。由于 C 语言的设计缺陷，这些系统引入了各种无需有的概念（进程，线程，虚拟内存……），以及它们带来的复杂性和开销。</p>
-
 <p>微内核与宏内核之争当然也包括在内，在我看来这些都是无需有的概念和争论。操作系统相关的领域有很多的“宗教斗争”，比如“Linux vs Windows”，“自由软件 vs 不自由软件”，“RISC vs CISC”，甚至“VIM vs Emacs”…… 人们为了证明自己用的系统或者工具是世界上“最好”的，吵得昏天黑地。遇到有人指出自己用的工具的缺点，随时可能拿枪毙了对方。这些被叫做“flame war”。</p>
-
 <p>我曾经是某些宗教斗争中活跃的一员，不知道这事的人可以去查一下我的历史。等你经历了很多才发现，原来这些宗教情绪和斗争都是那么幼稚无知。</p>
-
 <p>这种“技术宗教情绪”往往显示出参与者心理地位的低下。因为他们缺乏自信，所以他们的心理需要靠山。这个靠山可能是某种操作系统（比如 Linux），某种编程语言（比如 C++），或者某种工具（比如 VIM）。这些人以自己能熟练使用这些工具为豪，居高临下，看不起“异教徒”。</p>
-
 <p>具有技术宗教情绪的人看似是为了“技术”，“理想”，而其实跟那些以为开着豪车，穿着名牌就是“上流社会”的人是一样低级的，因为他们依靠于这些物品，所以他们的地位在这些物品之下。</p>
-
 <p>一个人需要彻底的把这些东西看成是“东西”，不带有任何崇拜或者鄙视的情绪，他的心理才算是成熟了。</p>
-
 <p>在我的理念里，一个操作系统本应该大概是<a href="http://www.yinwang.org/blog-cn/2013/04/14/os-design">这个样子</a>。简单得很，根本不存在那么多问题。我可以利用这些思想来看透现有操作系统的绝大部分思想，管它是微内核还是宏内核。我可以把现有的操作系统看成是这个系统的“退化版”。</p>
-
 <p>操作系统是一个死知识横行的领域。很多人发现操作系统课难学，难理解。里面有些内容，比如各种同步机制，很多人上完课毕了业，工作很多年以后都还弄不明白是怎么回事，它们为什么在那里。类似的东西包括虚拟内存，进程与线程的区别，等等。</p>
-
 <p>经过了很多的经验和思考，加上其他领域给我的启发，我终于明白了。原来很多这些概念都是无须有的，死掉的知识。</p>
-
 <p>操作系统课程里面的概念经常是这样形成的：</p>
-
 <ol>
-  <li>很久以前，有人为了解决了一个特定的问题，提出了一个概念（比如 semaphore）。这个概念本来只有一个用途，就是解决他遇到的那个特定的问题。</li>
-  <li>因为这人太有名，这概念就被写进了教科书里。有时候连他当时的具体实现细节都给写进去了。比如 semaphore 的两个操作被叫做 P 和 V，连这两个名字都给作为“典故”写进去了。</li>
-  <li>教授们照本宣科，吹毛求疵，要你用这概念解决很多其它问题。很多根本就是人为造出来的变态问题，现实中遇不到的，或者是一些不该用这个概念解决的问题。</li>
+<li>很久以前，有人为了解决了一个特定的问题，提出了一个概念（比如 semaphore）。这个概念本来只有一个用途，就是解决他遇到的那个特定的问题。</li>
+<li>因为这人太有名，这概念就被写进了教科书里。有时候连他当时的具体实现细节都给写进去了。比如 semaphore 的两个操作被叫做 P 和 V，连这两个名字都给作为“典故”写进去了。</li>
+<li>教授们照本宣科，吹毛求疵，要你用这概念解决很多其它问题。很多根本就是人为造出来的变态问题，现实中遇不到的，或者是一些不该用这个概念解决的问题。</li>
 </ol>
-
 <p>这就是为什么操作系统课学起来那么难——很多都是没道理的难。</p>
-
 <p>再加上 Unix 系统里面一堆设计恶劣，无法有效组合使用的工具软件，操作系统就在学生心中产生了威慑力。死记硬背，喜欢折腾，喜欢发现奇技淫巧的人，在这个领域里茁壮成长。逐渐的，他们产生了莫名的自信。他们并不理解里面的很多概念是怎么来的，只是记住了它们，他们写的代码很难看懂。然后他们开始从心理上打压那些记不住这些概念，看不懂他们代码的人。</p>
-
 <p>久而久之，这些人就成为了大家所崇拜的“神”。</p>
-
 <p>跟有些人聊操作系统是件闹心的事，因为我往往会抛弃一些术语和概念，从零开始讨论。我试图从“计算本质”的出发点来理解这类事物，理解它们的起因，发展，现状和可能的改进。我所关心的往往是“这个事物应该是什么样子”，“它还可以是什么（也许更好的）样子”，而不只是“它现在是什么样子”。不明白我的这一特性，又自恃懂点东西的人，往往会误以为我连基本的术语都不明白。于是天就这样被他们聊死了。</p>
-
 <p>幸运的是我有几个聊得来的朋友，他们不会那么教条主义。于是今天我跟一个朋友在微信上聊起了“微内核 vs 宏内核”这件事。其实这个问题在我脑子里已经比较清楚了，可是通过这些对话，我学到了新的东西。这些东西是我们在对话之前可能都没有完全理解的，也许很多其他人也没理解。所以我觉得可以把这些有价值的对话记录下来。</p>
-
 <p>我不想从头解释这个事，因为你可以从网络上找到“微内核”和“宏内核”的设计原理。我想展示在这里的只是我们的对话，里面有对也有错，翻来覆去的思想斗争。对话是一个很有意思的东西，我觉得比平铺直叙的文章还要有效一些。</p>
-
 <h3 id="对话">对话</h3>
-
 <p>好了，现在开始。对话人物“WY”是我，“LD”是我的一个朋友。</p>
-
 <p>（8 月 19 日，开始）</p>
-
 <div class="left">
 WY：好多年没折腾 OS，现在再折腾应该有新的发现。这篇 <a href="https://pdfs.semanticscholar.org/983f/f3bf3adf07c9679f4a4e49cd5a8db2e68c5a.pdf">paper</a> 说 Minix 3 比 Linux 要慢 510%。
 
-<p/>
+<p></p>
 WY：通常的定义，说微内核只需要 send 和 receive 两个系统调用。你不觉得有问题吗？其实函数调用的本质就是 send（参数）和 receive（返回值），但只有这两个系统调用，这种做法是过度的复用（multiplex）。
 
-<p/>
+<p></p>
 （下载 Minix 3 源代码看了一会儿。上网搜索关于微内核的资料……）
 </div>
-
 <div class="right">
 LD：是。
-<p/><p/>
+<p></p><p></p>
 LD：一个外设产生了中断，中断管理进程接收到到中断，发一个消息给相应的设备驱动进程，这个进程处理中断请求，如果设备驱动有 bug，挂了，也不会干扰 OS。这就是微内核逻辑。
 </div>
 <div class="left">
@@ -108,9 +86,9 @@ WY：改善的是通信开销，但仍然有进程切换开销。我刚看了一
 </div>
 <div class="right">
 LD：对呀，所以 L4 意义似乎不大。
-<p/>
+<p></p>
 LD：带“微”的除了微软和微信，没一个成功的。
-<p/>
+<p></p>
 LD：最近流行的所谓微服务。
 </div>
 <div class="left">
@@ -215,17 +193,15 @@ WY：这个英明了…… 而且看来微内核在集群方面也没什么用�
 <div class="right">
 LD：集群，每个计算机是一个 node。挂了也不怕。
 </div>
-
-<div class="row"/>
+<div class="row"></div>
 <p>（8 月 20 日继续讨论）</p>
-
 <div class="left">
 WY：我发现这个 <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.361.4009&amp;rep=rep1&amp;type=pdf">paper</a>……
-<p/>
+<p></p>
 WY：这东西叫 L4Linux，就是 Linux 跑在 L4 微内核上。比起纯 Linux，开销只有 5%
-<p/>
+<p></p>
 WY：代码在这里：http://os.inf.tu-dresden.de/L4/LinuxOnL4
-<p/>
+<p></p>
 WY：L4 的做法是 1) 小参数用寄存器传递，不切换某些寄存器。2) 大型参数把内存映射到接收进程，跟我之前设想的一样。这样避免了拷贝。然后采用了“direct process switch”，“lazy scheduling”降低了调度开销。现代处理器的 tagged TLB 之类也大大降低了进程切换开销。
 
 <img src="https://www.yinwang.org/images/direct-message-copy.jpg" width="56%"/>
@@ -237,13 +213,13 @@ LD：微内核好处真的很大么？
 </div>
 <div class="left">
 WY：好处就是微内核的好处，隔离。可能看各人需求了。一个 99.99% 可靠的系统和一个 99.999999% 可靠的系统的差别？
-<p/>
+<p></p>
 WY：不过似乎高可靠需求都去用 vxworks 之类的了
-<p/>
+<p></p>
 （上网查询 vxworks……）
-<p/>
+<p></p>
 WY：原来 vxworks 也是微内核。
-<p/>
+<p></p>
 WY：5% 的开销还可以接受…… 进程切换开销貌似没有提，用的地址映射方法。
 </div>
 <div class="right">
@@ -269,16 +245,16 @@ LD：可靠性应该是最高的之一。卫星、武器都用。
 </div>
 <div class="left">
 WY：波音 787 也用这个，各种火星车…… 貌似还是说明一些问题。
-<p/>
+<p></p>
 WY：还有个 <a href="https://www.ghs.com/products/safety_critical/integrity-do-178b.html">GreenHills Integrity DO-178B</a> 实时操作系统。F35 用的。
-<p/>
+<p></p>
 WY：Much of the F-35's software is written in C and C++ because of programmer availability; Ada83 code also is reused from the F-22. The Integrity DO-178B real-time operating system (RTOS) from Green Hills Software runs on COTS Freescale PowerPC processors.
-<p/>
+<p></p>
 WY：Freescale PowerPC...
 </div>
 <div class="right">
 LD：我们的一个 mcu 就是 Freescale 的 PowerPC
-<p/>
+<p></p>
 LD：有个叫“rtems”的 os，我一直很关注。
 </div>
 <div class="left">
@@ -291,19 +267,15 @@ safety critical and secure (MILS &amp; MLS) applications
 - Based on modern microkernel RTOS design
 - Fast, deterministic behavior with absolute minimum interrupt latencies
 </pre>
-<p/>
+<p></p>
 WY：Integrity 也是微内核。看来微内核是可靠一些，属于在 C 语言框架下的一个不错的折中方案。
 
 </div>
-<div class="row"/>
+<div class="row"></div>
 <p>……</p>
-
 <p>（如果你有什么不同意见，欢迎联系我。如果觉得有帮助，可以考虑<a href="http://www.yinwang.org/blog-cn/2016/04/13/pay-blog">付费</a>）</p>
-
-&#13;
-        </div>
-
-<script async defer="defer" src="https://www.googletagmanager.com/gtag/js?id=UA-7909075-5"></script>
+</div>
+<script async="" defer="defer" src="https://www.googletagmanager.com/gtag/js?id=UA-7909075-5"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){ dataLayer.push(arguments); }
@@ -313,6 +285,6 @@ gtag('config', 'UA-7909075-5');
 <script>
 var _hmt = _hmt || [];
 </script>
-<script async defer="defer" src="https://hm.baidu.com/hm.js?e3d40295e416616ddc21287da9646d31"></script>
+<script async="" defer="defer" src="https://hm.baidu.com/hm.js?e3d40295e416616ddc21287da9646d31"></script>
 </body>
 </html>
